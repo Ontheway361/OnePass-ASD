@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=5 nohup python -u occupy.py > logs/occupy.log &

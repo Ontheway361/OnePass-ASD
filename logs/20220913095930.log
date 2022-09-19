@@ -1,0 +1,113 @@
+--------------------------Environment Versions--------------------------
+- Python     : 3.8.0 (default, Dec  9 2021, 17:53:27) 
+[GCC 8.4.0]
+- PyTorch    : 1.12.0+cu113
+- TorchVison : 0.13.0+cu113
+- use_gpu    : True
+- is_debug   : False [Attention!]
+- workers    : 16
+- epochs     : 25
+- print_freq : 100
+- train_file : ava_activespeaker_train_loader_checked.csv
+- val_file   : ava_activespeaker_val_loader_checked.csv
+------------------------------------------------------------------------
+loading checkpoints from ./checkpoint/one_stage_baseline/epoch_12_loss_0.4627_acc_0.7881_auc_0.8227.pth ...
+step1. model is loaded ...
+there are 28770 lines in ava_activespeaker_train_loader_checked.csv
+group 28770 annolines into 1074 minibatches
+there are 07803 lines in ava_activespeaker_val_loader_checked.csv
+group 7803 annolines into 7803 minibatches
+step2. dataset is loaded ...
+epoch - 01||25 is starting ...
+train-iterate 0.0931, ave_instance_loss 0.998178, ave_acc 0.8332
+train-iterate 0.1862, ave_instance_loss 0.976393, ave_acc 0.8351
+train-iterate 0.2793, ave_instance_loss 0.960348, ave_acc 0.8369
+train-iterate 0.3724, ave_instance_loss 0.951373, ave_acc 0.8363
+train-iterate 0.4655, ave_instance_loss 0.943807, ave_acc 0.8354
+train-iterate 0.5587, ave_instance_loss 0.940292, ave_acc 0.8338
+train-iterate 0.6518, ave_instance_loss 0.931516, ave_acc 0.8354
+train-iterate 0.7449, ave_instance_loss 0.924375, ave_acc 0.8360
+train-iterate 0.8380, ave_instance_loss 0.921951, ave_acc 0.8350
+train-iterate 0.9311, ave_instance_loss 0.918832, ave_acc 0.8345
+  val-iterate 0.2499, ave_instance_loss 0.506760, ave_acc 0.7625
+  val-iterate 0.4998, ave_instance_loss 0.491131, ave_acc 0.7711
+  val-iterate 0.7497, ave_instance_loss 0.481621, ave_acc 0.7767
+  val-iterate 0.9996, ave_instance_loss 0.474010, ave_acc 0.7802
+delete the exists ./checkpoint/one_stage_baseline_multiheads
+---------------- epoch-001 summarys ----------------
+train_loss 0.9154, train_acc 0.8345, train_auc 0.8855
+ eval_loss 0.4740,  eval_acc 0.7802,  eval_auc 0.8110
+train_time 23.6756, eval_time 36.3778
+----------------------------------------------------
+epoch - 02||25 is starting ...
+train-iterate 0.0931, ave_instance_loss 0.863853, ave_acc 0.8439
+train-iterate 0.1862, ave_instance_loss 0.864554, ave_acc 0.8416
+train-iterate 0.2793, ave_instance_loss 0.858538, ave_acc 0.8436
+train-iterate 0.3724, ave_instance_loss 0.858381, ave_acc 0.8432
+train-iterate 0.4655, ave_instance_loss 0.851318, ave_acc 0.8446
+train-iterate 0.5587, ave_instance_loss 0.849852, ave_acc 0.8443
+train-iterate 0.6518, ave_instance_loss 0.845571, ave_acc 0.8452
+train-iterate 0.7449, ave_instance_loss 0.843962, ave_acc 0.8454
+train-iterate 0.8380, ave_instance_loss 0.841131, ave_acc 0.8459
+train-iterate 0.9311, ave_instance_loss 0.840523, ave_acc 0.8455
+  val-iterate 0.2499, ave_instance_loss 0.503336, ave_acc 0.7687
+  val-iterate 0.4998, ave_instance_loss 0.488143, ave_acc 0.7764
+  val-iterate 0.7497, ave_instance_loss 0.478704, ave_acc 0.7816
+  val-iterate 0.9996, ave_instance_loss 0.472192, ave_acc 0.7840
+---------------- epoch-002 summarys ----------------
+train_loss 0.8417, train_acc 0.8444, train_auc 0.8963
+ eval_loss 0.4722,  eval_acc 0.7840,  eval_auc 0.8159
+train_time 34.4845, eval_time 28.8118
+----------------------------------------------------
+epoch - 03||25 is starting ...
+train-iterate 0.0931, ave_instance_loss 0.781482, ave_acc 0.8666
+train-iterate 0.1862, ave_instance_loss 0.792261, ave_acc 0.8609
+train-iterate 0.2793, ave_instance_loss 0.794779, ave_acc 0.8587
+train-iterate 0.3724, ave_instance_loss 0.796685, ave_acc 0.8572
+train-iterate 0.4655, ave_instance_loss 0.796597, ave_acc 0.8567
+train-iterate 0.5587, ave_instance_loss 0.798034, ave_acc 0.8553
+train-iterate 0.6518, ave_instance_loss 0.795689, ave_acc 0.8557
+train-iterate 0.7449, ave_instance_loss 0.794593, ave_acc 0.8558
+train-iterate 0.8380, ave_instance_loss 0.795848, ave_acc 0.8548
+train-iterate 0.9311, ave_instance_loss 0.796743, ave_acc 0.8539
+  val-iterate 0.2499, ave_instance_loss 0.523802, ave_acc 0.7507
+  val-iterate 0.4998, ave_instance_loss 0.510362, ave_acc 0.7587
+  val-iterate 0.7497, ave_instance_loss 0.504671, ave_acc 0.7620
+  val-iterate 0.9996, ave_instance_loss 0.500366, ave_acc 0.7641
+---------------- epoch-003 summarys ----------------
+train_loss 0.7958, train_acc 0.8541, train_auc 0.9067
+ eval_loss 0.5003,  eval_acc 0.7642,  eval_auc 0.8205
+train_time 49.6052, eval_time 17.7735
+----------------------------------------------------
+epoch - 04||25 is starting ...
+train-iterate 0.0931, ave_instance_loss 0.749382, ave_acc 0.8699
+train-iterate 0.1862, ave_instance_loss 0.744813, ave_acc 0.8715
+train-iterate 0.2793, ave_instance_loss 0.750323, ave_acc 0.8686
+train-iterate 0.3724, ave_instance_loss 0.746509, ave_acc 0.8697
+train-iterate 0.4655, ave_instance_loss 0.745908, ave_acc 0.8697
+train-iterate 0.5587, ave_instance_loss 0.746491, ave_acc 0.8694
+train-iterate 0.6518, ave_instance_loss 0.749803, ave_acc 0.8679
+train-iterate 0.7449, ave_instance_loss 0.750786, ave_acc 0.8670
+train-iterate 0.8380, ave_instance_loss 0.752397, ave_acc 0.8663
+train-iterate 0.9311, ave_instance_loss 0.753278, ave_acc 0.8656
+  val-iterate 0.2499, ave_instance_loss 0.531627, ave_acc 0.7614
+  val-iterate 0.4998, ave_instance_loss 0.514895, ave_acc 0.7695
+  val-iterate 0.7497, ave_instance_loss 0.506577, ave_acc 0.7738
+  val-iterate 0.9996, ave_instance_loss 0.500188, ave_acc 0.7763
+---------------- epoch-004 summarys ----------------
+train_loss 0.7523, train_acc 0.8657, train_auc 0.9180
+ eval_loss 0.5002,  eval_acc 0.7763,  eval_auc 0.8093
+train_time 48.5693, eval_time 19.4979
+----------------------------------------------------
+epoch - 05||25 is starting ...
+train-iterate 0.0931, ave_instance_loss 0.704678, ave_acc 0.8832
+train-iterate 0.1862, ave_instance_loss 0.710875, ave_acc 0.8796
+train-iterate 0.2793, ave_instance_loss 0.708470, ave_acc 0.8801
+train-iterate 0.3724, ave_instance_loss 0.714652, ave_acc 0.8777
+train-iterate 0.4655, ave_instance_loss 0.713058, ave_acc 0.8782
+train-iterate 0.5587, ave_instance_loss 0.712267, ave_acc 0.8782
+train-iterate 0.6518, ave_instance_loss 0.714479, ave_acc 0.8775
+train-iterate 0.7449, ave_instance_loss 0.714770, ave_acc 0.8770
+train-iterate 0.8380, ave_instance_loss 0.713817, ave_acc 0.8772
+train-iterate 0.9311, ave_instance_loss 0.712396, ave_acc 0.8774
+Killed
