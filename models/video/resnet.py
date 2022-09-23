@@ -5,29 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from IPython import embed
 
-# class Conv2plus1D(nn.Module):
-#     def __init__(self, inplanes=1, outplanes=64, kernel_size=(5, 7, 7), stride=(1, 2, 2), padding=(2, 3, 3)):
-#         super(Conv2plus1D, self).__init__()
-#         self.spatial_conv2d = nn.Conv2d(inplanes, outplanes, kernel_size[1:], stride[:1], padding[:1]), bias=False)
-#         self.num_channels = 64 * 56 * 56
-#         self.temporal_conv1d = nn.Conv1d(self.num_channels, self.num_channels)
-#         self.spatial_bnrelu = nn.Sequential(
-#             nn.BatchNorm2d(outplanes),
-#             nn.ReLU())
-#         self.temporal_bnrelu = nn.Sequential(
-#             nn.BatchNorm1d(outplanes),
-#             nn.ReLU())
-
-#     def forward(self, x):
-#         # x.shape = [B, T, C, W, H]
-#         B, T, C, W, H = x.shape
-#         x = x.reshape(-1, C, W, H)
-#         x = self.spatial_conv2d(x)
-#         x = self.spatial_bnrelu(x)
-#         x = x.reshape(B, T, -1)
-#         x = x.transpose(2, 1)
-#         x = self.temporal_conv1d()
-
 class SpatialTemporal(nn.Module):
     def __init__(self, inplanes=1, outplanes=64, kernel_size=(5, 7, 7), stride=(1, 2, 2), padding=(2, 3, 3)):
         super(SpatialTemporal, self).__init__()
@@ -73,7 +50,13 @@ class BasicBlock(nn.Module):
         return x
 
 class ResNet(nn.Module):
-
+    layer_channels = {
+        'layer0' : (1, 64),
+        'layer1' : (64, 64),
+        'layer2' : (64, 128),
+        'layer3' : (128, 256),
+        'layer4' : (256, 512), 
+    }
     def __init__(self):
         super(ResNet, self).__init__()
         self.layer0 = nn.Sequential(

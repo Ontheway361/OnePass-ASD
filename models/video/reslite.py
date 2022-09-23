@@ -50,20 +50,23 @@ class SEBasicBlock(nn.Module):
         out = self.relu(out)
         return out
 
-class AudioEncoder(nn.Module):
-    def __init__(self, layers, num_filters, **kwargs):
-        super(AudioEncoder, self).__init__()
+class ResLite(nn.Module):
+    def __init__(self, layers=[3, 4, 6, 3], num_filters=[16, 32, 64, 128], **kwargs):
+        super(ResLite, self).__init__()
         block = SEBasicBlock
         self.inplanes = num_filters[0]
 
-        self.conv1 = nn.Conv2d(1, num_filters[0] , kernel_size=7, stride=(2, 1), padding=3, bias=False)
-        self.bn1 = nn.BatchNorm2d(num_filters[0])
-        self.relu = nn.ReLU(inplace=True)
-
+        self.layer0 = nn.Sequential(
+            nn.Conv2d(1, num_filters[0] , kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(num_filters[0]),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
         self.layer1 = self._make_layer(block, num_filters[0], layers[0])
-        self.layer2 = self._make_layer(block, num_filters[1], layers[1], stride=(2, 2))
-        self.layer3 = self._make_layer(block, num_filters[2], layers[2], stride=(2, 2))
-        self.layer4 = self._make_layer(block, num_filters[3], layers[3], stride=(1, 1))
+        self.layer2 = self._make_layer(block, num_filters[1], layers[1], stride=2)
+        self.layer3 = self._make_layer(block, num_filters[2], layers[2], stride=2)
+        self.layer4 = self._make_layer(block, num_filters[3], layers[3], stride=2)
+        self.avgpool = nn.AvgPool2d(kernel_size=(4, 4), stride=(1, 1))
         out_dim = num_filters[3] * block.expansion
 
         for m in self.modules():
@@ -81,25 +84,30 @@ class AudioEncoder(nn.Module):
                           kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(planes * block.expansion),
             )
-
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes))
-
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = x.unsqueeze(1).transpose(2, 3)    
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
+        # x.shape = [B, T, W, H]
+        x = x.unsqueeze(2)
+        B, T, C, H, W = x.shape 
+        x = x.reshape(-1, C, H, W)  
+        x = self.layer0(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-        x = torch.mean(x, dim=2, keepdim=True)
-        x = x.view((x.size()[0], x.size()[1], -1))
-        x = x.transpose(1, 2)
+        x = self.avgpool(x)
+        x = x.reshape(B, T, 128)
         return x
+
+if __name__ == "__main__":
+    print('hello world')
+    model = ResLite()
+    params = model.parameters()
+    total = sum([p.nelement() for p in params])
+    print('params %.4fM' % (total / 1e6)) 

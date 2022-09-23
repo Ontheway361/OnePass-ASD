@@ -5,6 +5,7 @@ import math
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+from IPython import embed
 
 def conv_bn(inp, oup, stride):
     return nn.Sequential(
@@ -61,7 +62,7 @@ class InvertedResidual(nn.Module):
 
 
 class MobileNetV2(nn.Module):
-    def __init__(self, num_classes=1000, sample_size=112, width_mult=1.):
+    def __init__(self, sample_size=112, width_mult=1.):
         super(MobileNetV2, self).__init__()
         block = InvertedResidual
         input_channel = 32  # TODO::Attention::default=32
@@ -81,7 +82,7 @@ class MobileNetV2(nn.Module):
         assert sample_size % 16 == 0.
         input_channel = int(input_channel * width_mult)
         self.last_channel = int(last_channel * width_mult) if width_mult > 1.0 else last_channel
-        self.features = [conv_bn(3, input_channel, (2, 2))]
+        self.features = [conv_bn(1, input_channel, (2, 2))]
         # building inverted residual blocks
         for t, c, n, s in interverted_residual_setting:
             output_channel = int(c * width_mult)
@@ -90,9 +91,10 @@ class MobileNetV2(nn.Module):
                 self.features.append(block(input_channel, output_channel, stride, expand_ratio=t))
                 input_channel = output_channel
         # building last several layers
-        self.features.append(
-            conv_1x1x1_bn(input_channel, self.last_channel),
-        )
+        self.features.append(conv_1x1x1_bn(input_channel, self.last_channel))
+
+        # avepool
+        self.features.append(nn.AvgPool2d(kernel_size=(4, 4), stride=(1, 1)))
         # make it nn.Sequential
         self.features = nn.Sequential(*self.features)
         
@@ -114,8 +116,21 @@ class MobileNetV2(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, x):
+        # x.shape = [B, T, W, H]
+        x = x.unsqueeze(2)
+        B, T, C, H, W = x.shape
+        x = x.reshape(-1, C, H, W)
         x = self.features(x)
+        x = x.reshape(B, T, 512)
         return x
 
 
 
+if __name__ == "__main__":
+    model = MobileNetV2()
+    params = model.parameters()
+    totals = sum([p.nelement() for p in params])
+    print('params %.4fM' % (totals / 1e6)) 
+    inptensor = torch.randn((1, 1, 112, 112))
+    outtensor = model(inptensor)
+    print(outtensor.shape)

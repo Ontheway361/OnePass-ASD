@@ -3,6 +3,7 @@
 import os
 import cv2
 import time
+import thop
 import torch
 import torchvision
 import numpy as np
@@ -10,7 +11,7 @@ import pandas as pd
 
 import models as asdlib 
 from config import optimize_args
-from dataset import AVA_ActiveSpeaker
+# from dataset import AVA_ActiveSpeaker
 
 from IPython import embed 
 
@@ -27,10 +28,10 @@ if __name__ == "__main__":
     # print(output.shape)
     
     ## DATASET
-    args = optimize_args()
-    loader = AVA_ActiveSpeaker(args, mode='val')
-    audios, videos, labels = loader.__getitem__(1)
-    print(audios.shape, videos.shape, labels.shape)
+    # args = optimize_args()
+    # loader = AVA_ActiveSpeaker(args, mode='val')
+    # audios, videos, labels = loader.__getitem__(1)
+    # print(audios.shape, videos.shape, labels.shape)
     # model = asdlib.OnePassASD_MultiHeads(args)
     # afeats = model.audio_encoder(audios)
     # vfeats = model.video_encoder(videos)
@@ -41,10 +42,33 @@ if __name__ == "__main__":
     # logits, afeats, vfeats = model(audios, videos)
     # print(logits.shape, afeats.shape, vfeats.shape)
     
-    model = asdlib.SincDSNet()
-    afeat = model(audios)
-    print(afeat.shape)
+    ## AUDIO
+    # model = asdlib.SincDSNet()
+    model = asdlib.AudioEncoder(layers=[3, 4, 6, 3],  num_filters=[16, 32, 64, 128])
+    # total = sum([p.nelement() for p in model.parameters()])
+    # print('params : %.4fM' % (total / 1e6))
+    audio = torch.randn((1, 4, 13))
+    flops, params = thop.profile(model, (audio, ))
+    print('audio-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
     
+    
+    ## VIDEO
+    # model = asdlib.ResNet()
+    model = asdlib.CustomizedNet()
+    video = torch.randn(1, 1, 112, 112)
+    flops, params = thop.profile(model, (video, ))
+    print('video-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
+
+    # model = torchvision.models.resnet18()
+    # video = torch.randn(1, 3, 112, 112)
+    # flops, params = thop.profile(model, (video, ))
+    # print('video-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
+
+    ## OnePass
+    args = optimize_args()
+    model = asdlib.OnePassASD_MultiHeads(args)
+    flops, params = thop.profile(model, (audio, video))
+    print('onepass-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
 
     # aloss = asdlib.AuxAudioLoss()
     # vloss = asdlib.AuxVisualLoss()

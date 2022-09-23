@@ -61,14 +61,14 @@ class AVA_ActiveSpeaker(data.Dataset):
             audio_file = os.path.join(self.args.audio_dir, entity_info[0] + '.wav')
             _, audio = wavfile.read(audio_file)
             videofps = float(entity_info[2])
-            # audio = python_speech_features.mfcc(audio, 16000, numcep=13, winlen=0.025*25/videofps, winstep=0.010*25/videofps)
+            audio = python_speech_features.mfcc(audio, 16000, numcep=13, winlen=0.025*25/videofps, winstep=0.010*25/videofps)
             maxAudio = int(unitnums * 4)
             # print(audio.shape, unitnums, videofps)
             if audio.shape[0] < maxAudio:
                 shortage = maxAudio - audio.shape[0]
                 audio = np.pad(audio, (((0, shortage), (0, 0))), mode='wrap')  # maybe 'edge'
-            # audio = audio[:maxAudio, :]
-            audio = audio[:maxAudio]
+            audio = audio[:maxAudio, :]
+            # audio = audio[:maxAudio]
             audiolist.append(audio)
         return torch.FloatTensor(np.array(audiolist))  
     
@@ -128,16 +128,3 @@ class AVA_ActiveSpeaker(data.Dataset):
         videos = self.cache_minibatch_video(minibatch, unitnums)
         labels = self.cache_minibatch_label(minibatch, unitnums)
         return (audios, videos, labels)
-
-
-             
-        
-
-
-
-
-
-        
-    
-    
-        

@@ -3,8 +3,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.video.resnet import ResNet
-from models.video.mobilenet import MobileNetV2
+# from models.video.resnet import ResNet
+# from models.video.reslite import ResLite
+# from models.video.mobilenet import MobileNetV2
+from models.video.customizednet import CustomizedNet
 from IPython import embed
 
 class GlobalLayerNorm(nn.Module):
@@ -67,7 +69,10 @@ class visualConv1D(nn.Module):
 class VisualEncoder(nn.Module):
     def __init__(self):
         super(VisualEncoder, self).__init__()
-        self.frame_encoder = ResNet()
+        self.frame_encoder = CustomizedNet()
+        # self.frame_encoder = ResLite()
+        # self.frame_encoder = ResNet()
+        # self.frame_encoder = MobileNetV2()
         self.visualTCN = visualTCN()
         self.visualConv1D = visualConv1D()
     
