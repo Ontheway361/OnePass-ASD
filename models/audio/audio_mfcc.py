@@ -51,7 +51,7 @@ class SEBasicBlock(nn.Module):
         return out
 
 class AudioEncoder(nn.Module):
-    def __init__(self, layers, num_filters, **kwargs):
+    def __init__(self, layers=[3, 4, 6, 3],  num_filters=[16, 32, 64, 128]):
         super(AudioEncoder, self).__init__()
         block = SEBasicBlock
         self.inplanes = num_filters[0]
@@ -96,7 +96,7 @@ class AudioEncoder(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = x.unsqueeze(1).transpose(2, 3)    
+        x = x.unsqueeze(1).transpose(2, 3) 
         x = self.layer0(x)
         # x = self.conv1(x)
         # x = self.bn1(x)
@@ -107,5 +107,5 @@ class AudioEncoder(nn.Module):
         x = self.layer4(x)
         x = torch.mean(x, dim=2, keepdim=True)
         x = x.view((x.size()[0], x.size()[1], -1))
-        x = x.transpose(1, 2)
+        x = x.transpose(1, 2) 
         return x

@@ -44,18 +44,19 @@ if __name__ == "__main__":
     
     ## AUDIO
     # model = asdlib.SincDSNet()
-    model = asdlib.AudioEncoder(layers=[3, 4, 6, 3],  num_filters=[16, 32, 64, 128])
+    # model = asdlib.AudioEncoder(layers=[3, 4, 6, 3],  num_filters=[16, 32, 64, 128])
+    model = asdlib.AudioNet()
     # total = sum([p.nelement() for p in model.parameters()])
     # print('params : %.4fM' % (total / 1e6))
-    audio = torch.randn((1, 4, 13))
+    audio = torch.randn((1, 100, 13))
     flops, params = thop.profile(model, (audio, ))
     print('audio-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
     
     
     ## VIDEO
     # model = asdlib.ResNet()
-    model = asdlib.CustomizedNet()
-    video = torch.randn(1, 1, 112, 112)
+    model = asdlib.VideoNet()
+    video = torch.randn(1, 25, 112, 112)
     flops, params = thop.profile(model, (video, ))
     print('video-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
 
@@ -66,10 +67,10 @@ if __name__ == "__main__":
 
     ## OnePass
     args = optimize_args()
-    model = asdlib.OnePassASD_MultiHeads(args)
+    model = asdlib.OnePassASD(args)
     flops, params = thop.profile(model, (audio, video))
     print('onepass-params : %.4fM, flops : %.4fG' % (params/1e6, flops/1e9))
-
+    torch.save(model.state_dict(), 'onepass-asd.pth')
     # aloss = asdlib.AuxAudioLoss()
     # vloss = asdlib.AuxVisualLoss()
     # closs = asdlib.ASDLoss()

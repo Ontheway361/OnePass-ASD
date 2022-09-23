@@ -57,47 +57,37 @@ class InvertedResidual(nn.Module):
         else:
             return self.conv(x)
 
-class CustomizedNet(nn.Module):
+class AudioNet(nn.Module):
 
     def __init__(self):
-        super(CustomizedNet, self).__init__()
+        super(AudioNet, self).__init__()
         interverted_residual_setting = [
             # e, c, n, s
-            [2,  64, 2, 1],
-            [2, 128, 2, 2],
-            [2, 256, 2, 2],
-            [1, 512, 2, 2],
+            [2,  16, 2, 1],
+            [2,  32, 2, 2],
+            [2,  64, 2, 2],
+            [1, 128, 2, 1],
         ]
         self.last_channel = 128
         self.layers = []
-        self.layers.append(conv_bn(1, 64, k=7, s=2, p=3))
-        self.layers.append(nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
+        self.layers.append(conv_bn(1, 16, k=7, s=(2, 1), p=3))
         # building inverted residual blocks
-        inp_c = 64
+        inp_c = 16
         for e, c, n, s in interverted_residual_setting:
             out_c = c
             for i in range(n):
                 stride = s if i == 0 else 1
                 self.layers.append(InvertedResidual(inp_c, out_c, stride, e))
                 inp_c = out_c
-        self.layers.append(conv_1x1x1_bn(inp_c, self.last_channel))
-        self.layers.append(nn.AvgPool2d(kernel_size=4, stride=1))
+        self.layers.append(nn.ReLU(inplace=True))
         self.layers = nn.Sequential(*self.layers)
 
     def forward(self, x):
-        # x.shape  = [B, T, W, H]
-        x = x.unsqueeze(2)
-        B, T, C, H, W = x.shape
-        x = x.reshape(-1, C, H, W)
+        ## x.shape  = [B, T, F]
+        B, _, _ = x.shape
+        x = x.unsqueeze(1).transpose(2, 3) 
         x = self.layers(x)
-        x = x.reshape(B, T, 128)
+        x = torch.mean(x, dim=2, keepdim=True)
+        x = x.view((B, self.last_channel, -1))
+        x = x.transpose(1, 2)
         return x
-
-if __name__ == "__main__":
-    model = CustomizedNet()
-    params = model.parameters()
-    totals = sum([p.nelement() for p in params])
-    print('params %.4fM' % (totals / 1e6)) 
-    inptensor = torch.randn((1, 1, 112, 112))
-    outtensor = model(inptensor)
-    print(outtensor.shape)

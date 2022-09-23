@@ -5,9 +5,9 @@ import torch.nn as nn
 from IPython import embed
 
 class RNNLayer(nn.Module):
-    def __init__(self, input_size=256, hidden_size=128, batch_first=True):
+    def __init__(self, input_size=256, hidden_size=128, num_layers=2, batch_first=True):
         super(RNNLayer, self).__init__()
-        self.rnn =  nn.RNN(input_size, hidden_size, num_layers=2, dropout=0.1, batch_first=batch_first, bidirectional=False)
+        self.rnn =  nn.RNN(input_size, hidden_size, num_layers=num_layers, dropout=0.1, batch_first=batch_first, bidirectional=False)
     
     def forward(self, x):
         # x.shape = (B, T, F)
@@ -17,9 +17,9 @@ class RNNLayer(nn.Module):
         return x
 
 class LSTMLayer(nn.Module):
-    def __init__(self, input_size=256, hidden_size=128, batch_first=True):
+    def __init__(self, input_size=256, hidden_size=128, num_layers=2, batch_first=True):
         super(LSTMLayer, self).__init__()
-        self.rnn = nn.LSTM(input_size, hidden_size, num_layers=2, dropout=0.1, batch_first=batch_first, bidirectional=False)
+        self.rnn = nn.LSTM(input_size, hidden_size, num_layers=num_layers, dropout=0.1, batch_first=batch_first, bidirectional=False)
 
     def forward(self, x):
         # x.shape = (B, T, F)
@@ -29,9 +29,9 @@ class LSTMLayer(nn.Module):
         return x
 
 class GRULayer(nn.Module):
-    def __init__(self, input_size=256, hidden_size=128, batch_first=True):
+    def __init__(self, input_size=256, hidden_size=128, num_layers=2, batch_first=True):
         super(GRULayer, self).__init__()
-        self.rnn = nn.GRU(input_size, hidden_size, num_layers=2, dropout=0.1, batch_first=batch_first, bidirectional=False)
+        self.rnn = nn.GRU(input_size, hidden_size, num_layers=num_layers, dropout=0.1, batch_first=batch_first, bidirectional=False)
 
     def forward(self, x):
         # x.shape = (B, T, F)
@@ -62,16 +62,16 @@ class AttentionLayer(nn.Module):
         return src
 
 class TemporalModel(nn.Module):
-    def __init__(self, tm_base='rnn', input_size=256, hidden_size=128):
+    def __init__(self, tm_base='rnn', input_size=256, hidden_size=128, num_layers=2):
         super(TemporalModel, self).__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         if tm_base == 'rnn':
-            self.temporal_model = RNNLayer(input_size, hidden_size)
+            self.temporal_model = RNNLayer(input_size, hidden_size, num_layers)
         elif tm_base == 'lstm':
-            self.temporal_model = LSTMLayer(input_size, hidden_size)
+            self.temporal_model = LSTMLayer(input_size, hidden_size, num_layers)
         elif tm_base == 'gru':
-            self.temporal_model = GRULayer(input_size, hidden_size)
+            self.temporal_model = GRULayer(input_size, hidden_size, num_layers)
         elif tm_base == 'attention':
             self.temporal_model()
             raise TypeError('ts_base must be rnn, lstm or gru')
@@ -79,5 +79,5 @@ class TemporalModel(nn.Module):
     def forward(self, x):
         # x : [n_batch, seqlen, feat_dim]
         x = self.temporal_model(x)
-        x = x.reshape(-1, self.hidden_size)
+        # x = x.reshape(-1, self.hidden_size)
         return x
