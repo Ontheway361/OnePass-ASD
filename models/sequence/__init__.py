@@ -1,1 +1,1 @@
-from models.sequence.temporal import TemporalModel, AttentionLayer
+from models.sequence.temporal import VideoTepModel, TemporalModel, AttentionLayer

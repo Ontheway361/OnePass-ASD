@@ -68,7 +68,7 @@ class VideoNet(nn.Module):
             [2, 256, 2, 2],
             [1, 512, 2, 2],
         ]
-        self.last_channel = 128
+        self.last_channel = 512
         self.layers = []
         self.layers.append(conv_bn(1, 64, k=7, s=2, p=3))
         self.layers.append(nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
@@ -90,14 +90,5 @@ class VideoNet(nn.Module):
         B, T, C, H, W = x.shape
         x = x.reshape(-1, C, H, W)
         x = self.layers(x)
-        x = x.reshape(B, T, 128)
+        x = x.reshape(B, T, self.last_channel)
         return x
-
-if __name__ == "__main__":
-    model = VideoNet()
-    params = model.parameters()
-    totals = sum([p.nelement() for p in params])
-    print('params %.4fM' % (totals / 1e6)) 
-    inptensor = torch.randn((1, 1, 112, 112))
-    outtensor = model(inptensor)
-    print(outtensor.shape)

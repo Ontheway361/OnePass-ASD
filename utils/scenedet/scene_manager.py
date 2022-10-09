@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from re import S
 from tqdm import tqdm
 import sys, queue, threading
 from scenedetect.frame_timecode import FrameTimecode

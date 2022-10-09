@@ -81,3 +81,37 @@ class TemporalModel(nn.Module):
         x = self.temporal_model(x)
         # x = x.reshape(-1, self.hidden_size)
         return x
+
+class DSConv1d(nn.Module):
+    def __init__(self, in_channels=512, out_channels=512, kernel_size=3, stride=1, padding=1):
+        super(DSConv1d, self).__init__()
+        self.net = nn.Sequential(
+            nn.Conv1d(in_channels, out_channels, kernel_size, stride, padding, dilation=1, groups=in_channels, bias=False),
+            nn.BatchNorm1d(out_channels),
+            nn.ReLU()
+        )
+
+    def forward(self, x):
+        out = self.net(x)
+        return out + x
+
+class VideoTepModel(nn.Module):
+    def __init__(self, in_channels=512, out_channels=128, num_layers=5):
+        super(VideoTepModel, self).__init__()
+        self.layers = []
+        for i in range(num_layers):
+            self.layers.append(DSConv1d(in_channels, in_channels, 5, 1, 2))
+        self.layers.append(
+            nn.Sequential(
+                nn.Conv1d(in_channels, in_channels // 2, 5, stride=1, padding=2),
+                nn.BatchNorm1d(in_channels // 2),
+                nn.ReLU(inplace=True),
+                nn.Conv1d(in_channels // 2, out_channels, 1),
+            )
+        )
+        self.layers = nn.Sequential(*self.layers)
+    def forward(self, x):
+        x = x.transpose(1, 2)
+        x = self.layers(x)
+        x = x.transpose(1, 2)
+        return x 
