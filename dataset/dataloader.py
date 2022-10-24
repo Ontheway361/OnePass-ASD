@@ -54,13 +54,14 @@ class AVA_ActiveSpeaker(data.Dataset):
     
     def __len__(self):
         return len(self.minibatch_list)
-
+    
     def cache_minibatch_audio(self, minibatch, unitnums):
         audiolist = []
         for entity_info in minibatch:
             audio_file = os.path.join(self.args.audio_dir, entity_info[0] + '.wav')
             _, audio = wavfile.read(audio_file)
             videofps = float(entity_info[2])
+            
             audio = python_speech_features.mfcc(audio, 16000, numcep=13, winlen=0.025*25/videofps, winstep=0.010*25/videofps)
             maxAudio = int(unitnums * 4)
             # print(audio.shape, unitnums, videofps)
@@ -128,3 +129,4 @@ class AVA_ActiveSpeaker(data.Dataset):
         videos = self.cache_minibatch_video(minibatch, unitnums)
         labels = self.cache_minibatch_label(minibatch, unitnums)
         return (audios, videos, labels)
+

@@ -13,7 +13,7 @@ class OnePassASD(nn.Module):
     def __init__(self, args):
         super(OnePassASD, self).__init__()
         self.audio_ec = alib.AudioNet()
-        self.video_en = vlib.VideoNet()
+        self.video_ec = vlib.VideoNet()
         self.video_tm = slib.VideoTepModel(512, 128, 5)
         self.avfea_tm = slib.TemporalModel(args.tm_base, 256, 128, 2)
         self.drop_out = nn.Dropout(p=0.6)
@@ -22,7 +22,7 @@ class OnePassASD(nn.Module):
     def forward(self, a, v):
         a = self.audio_ec(a)
         # a = self.audio_tm(a)
-        v = self.video_en(v)
+        v = self.video_ec(v)
         v = self.video_tm(v)
         f = torch.cat((a, v), dim=2)
         f = self.avfea_tm(f)

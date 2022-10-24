@@ -107,6 +107,7 @@ class SceneManager(object):
             base_timecode = self._base_timecode
         if base_timecode is None:
             return []
+        embed()
         cut_list = self.get_cut_list(base_timecode)
         scene_list = self.get_scenes_from_cuts(cut_list, base_timecode)
         if not cut_list and not start_in_scene:
