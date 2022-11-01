@@ -37,7 +37,8 @@ class ASDDemo(object):
     def load_model(self):
         print('step01. loading model ...')
         try:
-            self.modelzoos['asd'] = mlib.OnePassASD(self.args)
+            # self.modelzoos['asd'] = mlib.OnePassASD(self.args)
+            self.modelzoos['asd'] = mlib.BaseLine(device=self.device)
             if self.device == 'cuda':
                 self.modelzoos['asd'] = self.modelzoos['asd'].cuda()
             if os.path.isfile(self.args.pretrain):
@@ -345,7 +346,7 @@ class ASDDemo(object):
                 cv2.putText(frame, scoretxt, (x1, y1), fontFace, 1, color, thickness=2)
             videoio.write(frame)
         videoio.release()
-        demo_file = os.path.join(self.args.test_dir, 'demos', '%s_add.avi' % base_name)
+        demo_file = os.path.join(self.args.test_dir, 'demos', '%s_author.avi' % base_name)
         cmd = 'ffmpeg -y -i %s -i %s -threads %d -c:v copy -c:a copy %s -loglevel quiet' % (\
             staic_video, self.data['afile'], self.args.threads, demo_file)
         subprocess.call(cmd, shell=True, stdout=None) 
@@ -353,13 +354,11 @@ class ASDDemo(object):
 
     def run_demo(self, test_video='', is_25_fps=False):
         self.report_config_summary()
-        # self.load_model()
+        self.load_model()
         self.parse_video(test_video, is_25_fps)
         self.load_video_frames()
-        # self.load_video_audios()
+        self.load_video_audios()
         self.detect_video_scenes()
-        print(self.data['scenelist'])
-        '''
         self.detect_video_faces()
 
         # middle_file = 'testset/middle/shawshank.npy'
@@ -379,12 +378,12 @@ class ASDDemo(object):
 
         # del self.data['frames']
         # np.save(middle_file, self.data)
-        '''
 
 if __name__ == "__main__":
     
     args = clib.demo_args()
     demo = ASDDemo(args)
     # test_video = 'testset/videos/noodles.mp4'
-    test_video = 'testset/videos/movie_1_60fps.mp4'
+    # test_video = 'testset/videos/movie_1_60fps.mp4'
+    test_video = 'testset/capav/cap_video.mp4'  # [two_ids_noise.mov, three_ids_quite.mov, one_id_noise.mov, two_id_slient.mov]
     demo.run_demo(test_video)

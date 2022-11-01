@@ -1,0 +1,10 @@
+pytorch>=1.6.0 
+torchvision>=0.10.0 
+torchaudio>=0.6.0 
+pyaudio
+scenedetect
+python_speech_features
+numpy
+scipy
+tqdm
+

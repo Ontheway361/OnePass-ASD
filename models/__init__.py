@@ -1,3 +1,4 @@
+from models.baseline import BaseLine
 from models.onepass import OnePassASD
 from models.audio import SincDSNet, AudioEncoder, AudioNet
 from models.video import ResNet, ResLite, MobileNetV2, VideoNet, VisualEncoder

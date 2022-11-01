@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
-from tracemalloc import start
+from re import U
 import numpy as np
 import os, cv2, sys, time, threading
+import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import torch, torchvision, python_speech_features
 import utils as ulib
 import config as clib
 import models as mlib
-from IPython import embed
-
-# CA_ASSERT_MAIN_THREAD_TRANSACTIONS=1
+from IPython import embed, display
 class ASDDemo(object):
 
     def __init__(self, args):
         self.args = args
         self.modelzoos = {}
         self.frame_index = 0
-        self.max_seq_len = 30000
-        self.data = {'demo_seq':[], 'infer':True, 'disp':True}
+        self.data = {'demo_seq':[], 'demo':True}
         self.softmax = torch.nn.Softmax(dim=1)
+        self.avio = ulib.CaptureCameraAV()
         self.device = 'cuda' if args.use_gpu and torch.cuda.is_available() else 'cpu'
         self._report_config_summary()
-        self.avio = ulib.CaptureCameraAV()
         self._load_model()
+        # self.dynamic_display(is_start=True)
     
     def _report_config_summary(self):
         print('%sEnvironment Versions%s' % ('-' * 26, '-' * 26))
@@ -37,7 +36,7 @@ class ASDDemo(object):
         print('-' * 72)
     
     def _load_model(self):
-        print('step2. loading model ...')
+        print('step1. loading model ...')
         try:
             self.modelzoos['asd'] = mlib.OnePassASD(self.args)
             if self.device == 'cuda':
@@ -58,19 +57,8 @@ class ASDDemo(object):
         except Exception as e:
             print(e)
     
-    def dynamic_sampling(self):
-        frames, audios = self.avio.cache_buffer()
-        nframes, naudios = len(frames), len(audios)
-        naudio_per_frame = int(naudios / nframes)
-        if nframes > self.max_seq_len:
-            sampling_interval = round(nframes / self.max_seq_len)
-            frames = frames[::sampling_interval]
-            slices = [audios[i * naudio_per_frame : (i + 1) * naudio_per_frame, :] for i in range(len(frames))]
-            audios = np.vstack(slices)
-        return frames, audios
-
     def fetch_buffer_data(self, verbose=True):
-        frames, audios = self.dynamic_sampling()
+        frames, audios = self.avio.cache_buffer()
         self.data['frame_seq'] = frames
         self.data['audio_seq'] = audios
         if verbose:
@@ -206,53 +194,45 @@ class ASDDemo(object):
                 cv2.imwrite(save_file, frame)
             self.frame_index += 1
     
-    def dynamic_display(self):
-        wait_idx, wait_tolerance_time = 0, 10
-        while self.data['disp']:
+    def show_buffer_data_asd_scores(self):
+        fig = plt.figure('active speaker detection demo')
+        wait_idx, wait_tolerance_time = 0, 100
+        while self.data['demo']:
             if len(self.data['demo_seq']) == 0:
                 time.sleep(0.05)
                 wait_idx += 1
             else:
                 wait_idx = 0
                 while len(self.data['demo_seq']):
-                    frame = self.data['demo_seq'][0]
-                    cv2.imshow('active speaker detection demo', frame)
-                    cv2.waitKey(40)
-                    del self.data['demo_seq'][0]
+                    frame = cv2.cvtColor(self.data['demo_seq'][0], cv2.COLOR_BGR2RGB)
+                    plt.imshow(frame)
+                    # display.display(plt.gcf())
+                    plt.pause(0.001)
+                    # fig.clf()
+                    del self.data['demo_seq'][:2]
             if wait_idx > wait_tolerance_time:
+                # self.data['demo'] = False
                 break
-        # try:
-        #     cv2.distroyAllWindows()
-        # except:
-        #     pass
-
-    def calculate_decay_factor(self):
-        wait_time = 1.0
-        num_buffer_frames = len(self.data['frame_seq'])
-        if num_buffer_frames >= 40:
-            wait_time = 0.01
-        elif 20 < num_buffer_frames < 40:
-            wait_time = 0.04
-        elif 10 < num_buffer_frames <= 20:
-            wait_time = 0.05
+        
+    def dynamic_display(self, is_start=True):
+        if is_start:
+            self.data['disp_thread'] = threading.Thread(target=self.show_buffer_data_asd_scores)
+            self.data['disp_thread'].start()
         else:
-            wait_time = 1.0
-        return wait_time
-    
-    def show_log_details(self, time_seq, verbose=True):
-        print('buffer_len : %02d, infer_cost : %.4fs, show_cost : %.4fs ...' % (\
-                len(self.data['frame_seq']), time_seq[1] - time_seq[0], time_seq[2] - time_seq[1]))
+            self.data['demo'] = False
+            self.data['disp_thread'].join()
 
-
-    def online_demo(self, capture_time=30):
-        print('step3. start the model-infer process ... ')
-        start_time = time.time()
-        wait_time = 2.0
+    def online_demo(self, capture_time=20):
         self.avio.start_capture()
+        start_time = time.time()
+        # cmd = 'rm -rf tmp/capture_demo/*.jpg' 
+        # os.system(cmd)
+        # self.dynamic_display()
+        pipline_run_index = 0
         while time.time() - start_time < capture_time:
-            time_seq = [0, 0, 0]
-            time.sleep(wait_time)
-            time_seq[0] = time.time()
+            if pipline_run_index == 0:
+                time.sleep(1)
+            pip_start = time.time()
             self.fetch_buffer_data(verbose=False)
             self.detect_buffer_faces()
             self.track_buffer_faces()
@@ -260,16 +240,26 @@ class ASDDemo(object):
             self.active_speaker_detect()
             self.collect_buffer_asd_scores()
             self.text_buffer_asd_scores()
-            time_seq[1] = time.time()
-            self.dynamic_display()
-            time_seq[2] = time.time()
-            self.show_log_details(time_seq, verbose=True)
-            wait_time = self.calculate_decay_factor()
+            pip_finish = time.time()
+            self.show_buffer_data_asd_scores()
+            show_finish = time.time()
+            pipline_run_index += 1
+            print('asd-pip cost %.4fs, imshow cost %.4fs' % (pip_finish - pip_start, show_finish - pip_finish))
         self.avio.stop_capture()
+        time.sleep(10)
+        # self.dynamic_display(is_start=False)
     
+    def demo_runner(self, capture=20):
+        # self.online_demo(capture_time=capture)
+        try:
+            self.online_demo(capture_time=capture)
+        except Exception as e:
+            print(e)
+            self.avio.stop_capture()
+        
+        
 if __name__ == "__main__":
     
     args = clib.demo_args()
     demo = ASDDemo(args)
-    demo.online_demo(capture_time=60)
-    
+    demo.demo_runner()

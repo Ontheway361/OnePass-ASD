@@ -20,7 +20,8 @@ def demo_args():
     parser.add_argument('--demo_dir',   type=str, default=os.path.join(test_dir, 'demos'))
     
     # -- model
-    parser.add_argument('--pretrain',    type=str,   default='./checkpoint/one_stage_ASD_self_add.pth')
+    # parser.add_argument('--pretrain',    type=str,   default='./checkpoint/one_stage_ASD_self_add.pth')
+    parser.add_argument('--pretrain',    type=str,   default='./checkpoint/one_stage_ASD_baseline_author.pth')
     parser.add_argument('--tm_base',     type=str,   default='rnn', choices=['rnn', 'lstm', 'gru'])
     parser.add_argument('--face_size',   type=tuple, default=(112, 112))
     parser.add_argument('--longside',    type=int, default=640)
@@ -33,7 +34,8 @@ def demo_args():
     parser.add_argument('--track_iou_thresh', type=float, default=0.5)
     parser.add_argument('--smooth_win_size',  type=int,   default=13)
     parser.add_argument('--crop_face_scale',  type=float, default=0.0)  # TODO::Attention, default=0.4
-    parser.add_argument('--duration_list',    type=list,  default=[1])
+    parser.add_argument('--frame_shape',      type=tuple, default=(640, 360))
+    parser.add_argument('--duration_list',    type=list,  default=[1, 2, 3])
 
     # -- verbose
     parser.add_argument('--print_freq', type=int,   default=10)
